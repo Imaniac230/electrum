@@ -30,7 +30,7 @@ import string
 from typing import Sequence, Dict
 from types import MappingProxyType
 
-from .util import resource_path, bfh, bh2u, randrange
+from .util import resource_path, bfh, bh2u, randrange, InvalidBiometricData
 from .crypto import hmac_oneshot
 from . import version
 from .logging import Logger
@@ -162,6 +162,9 @@ class Mnemonic(Logger):
         passphrase = passphrase or ''
         passphrase = normalize_text(passphrase)
         return hashlib.pbkdf2_hmac('sha512', mnemonic.encode('utf-8'), b'electrum' + passphrase.encode('utf-8'), iterations = PBKDF2_ROUNDS)
+#        a = hashlib.pbkdf2_hmac('sha512', mnemonic.encode('utf-8'), b'electrum' + passphrase.encode('utf-8'), iterations = PBKDF2_ROUNDS)
+#        print(f"hashed seed: {a.hex()}\n")
+#        return a
 
     def mnemonic_encode(self, i):
         n = len(self.wordlist)
@@ -187,21 +190,33 @@ class Mnemonic(Logger):
             i = i*n + k
         return i
 
-    def make_seed(self, *, seed_type=None, num_bits=None) -> str:
+    def make_seed(self, *, seed_type=None, num_bits=None, opt_biometric=False) -> str:
         from .keystore import bip39_is_checksum_valid
         if seed_type is None:
             seed_type = 'segwit'
         if num_bits is None:
             num_bits = 132
         prefix = version.seed_prefix(seed_type)
-        # increase num_bits in order to obtain a uniform distribution for the last word
-        bpw = math.log(len(self.wordlist), 2)
-        num_bits = int(math.ceil(num_bits/bpw) * bpw)
-        self.logger.info(f"make_seed. prefix: '{prefix}', entropy: {num_bits} bits")
-        entropy = 1
-        while entropy < pow(2, num_bits - bpw):
-            # try again if seed would not contain enough words
-            entropy = randrange(pow(2, num_bits))
+        # is this feasable? will never have deterministic data from sensors
+        # does this break security?
+        # don't even use a dictionary? -> bio data instead of words as seed?
+        # don't rely on fingerprints only -> use a more robust combination of finger (multiple fingers?), voice, face, etc.
+        # access sensors directly -> never store any biometric data
+        if opt_biometric:
+            try:
+                with open("finger_template3.fpt", "r") as f:
+                    entropy = int(f.read(), base=16)
+            except Exception:
+                raise InvalidBiometricData()
+        else:
+            # increase num_bits in order to obtain a uniform distribution for the last word
+            bpw = math.log(len(self.wordlist), 2)
+            num_bits = int(math.ceil(num_bits/bpw) * bpw)
+            self.logger.info(f"make_seed. prefix: '{prefix}', entropy: {num_bits} bits")
+            entropy = 1
+            while entropy < pow(2, num_bits - bpw):
+                # try again if seed would not contain enough words
+                entropy = randrange(pow(2, num_bits))
         nonce = 0
         while True:
             nonce += 1
@@ -219,6 +234,7 @@ class Mnemonic(Logger):
             if is_new_seed(seed, prefix):
                 break
         self.logger.info(f'{len(seed.split())} words')
+#        print(f"{i}: {seed}")
         return seed
 
 

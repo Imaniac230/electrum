@@ -153,6 +153,13 @@ class FileExportFailed(Exception):
     def __str__(self):
         return _("Failed to export to file.") + "\n" + self.message
 
+class InvalidBiometricData(Exception):
+    def __init__(self, message=''):
+        self.message = str(message)
+
+    def __str__(self):
+        return _("Failed to extract biometric data." + "\n" + self.message)
+
 
 class WalletFileException(Exception): pass
 
