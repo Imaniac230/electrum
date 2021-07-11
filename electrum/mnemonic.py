@@ -204,7 +204,7 @@ class Mnemonic(Logger):
         # access sensors directly -> never store any biometric data
         if opt_biometric:
             try:
-                with open("finger_template3.fpt", "r") as f:
+                with open("/root/electrum_test/finger_template3.fpt", "r") as f:
                     entropy = int(f.read(), base=16)
             except Exception:
                 raise InvalidBiometricData()

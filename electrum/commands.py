@@ -239,7 +239,7 @@ class Commands:
         return await self.daemon._stop_wallet(wallet_path)
 
     @command('')
-    async def create(self, passphrase=None, password=None, encrypt_file=True, seed_type=None, wallet_path=None):
+    async def create(self, passphrase=None, password=None, encrypt_file=True, seed_type=None, wallet_path=None, opt_biometric=False):
         """Create a new wallet.
         If you want to be prompted for an argument, type '?' or ':' (concealed)
         """
@@ -248,11 +248,12 @@ class Commands:
                               password=password,
                               encrypt_file=encrypt_file,
                               seed_type=seed_type,
-                              config=self.config)
+                              config=self.config,
+                              opt_biometric=opt_biometric)
         return {
-            'seed': d['seed'],
+            'seed': d['seed'] if not opt_biometric else None,
             'path': d['wallet'].storage.path,
-            'msg': d['msg'],
+            'msg': d['msg'] if not opt_biometric else None,
         }
 
     @command('')
@@ -1299,6 +1300,7 @@ command_options = {
     'iknowwhatimdoing': (None, "Acknowledge that I understand the full implications of what I am about to do"),
     'gossip':      (None, "Apply command to gossip node instead of wallet"),
     'connection_string':      (None, "Lightning network node ID or network address"),
+    'opt_biometric':          ("-Bio", "Create/restore a wallet with biometric data."),
 }
 
 

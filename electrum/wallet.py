@@ -3246,14 +3246,14 @@ class Wallet(object):
 
 
 def create_new_wallet(*, path, config: SimpleConfig, passphrase=None, password=None,
-                      encrypt_file=True, seed_type=None, gap_limit=None) -> dict:
+                      encrypt_file=True, seed_type=None, gap_limit=None, opt_biometric=False) -> dict:
     """Create a new wallet"""
     storage = WalletStorage(path)
     if storage.file_exists():
         raise Exception("Remove the existing wallet first!")
     db = WalletDB('', manual_upgrades=False)
 
-    seed = Mnemonic('en').make_seed(seed_type=seed_type)
+    seed = Mnemonic('en').make_seed(seed_type=seed_type, opt_biometric=opt_biometric)
     k = keystore.from_seed(seed, passphrase)
     db.put('keystore', k.dump())
     db.put('wallet_type', 'standard')
