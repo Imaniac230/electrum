@@ -251,7 +251,7 @@ class Commands:
                               config=self.config,
                               opt_biometric=opt_biometric)
         return {
-            'seed': d['seed'] if not opt_biometric else None,
+            'seed': d['seed'],
             'path': d['wallet'].storage.path,
             'msg': d['msg'] if not opt_biometric else None,
         }

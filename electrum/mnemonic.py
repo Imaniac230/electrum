@@ -199,13 +199,21 @@ class Mnemonic(Logger):
         prefix = version.seed_prefix(seed_type)
         # is this feasable? will never have deterministic data from sensors
         # does this break security?
-        # don't even use a dictionary? -> bio data instead of words as seed?
+        # a better way to interpret the fingerprint data?
+        # don't even use a wordlist? -> bio data instead of words as seed?
         # don't rely on fingerprints only -> use a more robust combination of finger (multiple fingers?), voice, face, etc.
-        # access sensors directly -> never store any biometric data
         if opt_biometric:
             try:
-                with open(os.environ['HOME'] + "/electrum_test/finger_template3.fpt", "r") as f:
-                    entropy = int(f.read(), base=16)
+#                with open("finger_template.fpt", "r") as f:
+#                    entropy = int(f.read(), base=16)
+                import ctypes as ct
+                r503_so = "./electrum/biometric-experiments/r503_fingerprint.so"
+                fingerprint = ct.CDLL(r503_so).GetFingerprintData
+                fingerprint.restype = ct.POINTER(ct.c_int16 * 200)
+
+                finger = fingerprint().contents
+                finger = finger[0:finger[:].index(-1)]
+                entropy = int("".join(map(str, finger)))
             except Exception:
                 raise InvalidBiometricData()
         else:
