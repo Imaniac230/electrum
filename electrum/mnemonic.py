@@ -213,7 +213,7 @@ class Mnemonic(Logger):
 
                 finger = fingerprint().contents
                 finger = finger[0:finger[:].index(-1)]
-                entropy = int("".join(map(str, finger)))
+                entropy = int("".join(map(hex, finger)).replace("0x", ""), base=16)
             except Exception:
                 raise InvalidBiometricData()
         else:
