@@ -3283,6 +3283,8 @@ def create_new_wallet(*, path, config: SimpleConfig, passphrase=None, password=N
     wallet.update_password(old_pw=None, new_pw=password, encrypt_storage=encrypt_file)
     wallet.synchronize()
     msg = "Please keep your seed in a safe place; if you lose it, you will not be able to restore your wallet."
+    if opt_biometric:
+        msg = "The seed itself should be irrelevant as the goal is to always create the same seed and wallet from the same biometric data. However, this doesn't work yet and might even be impossible!"
     wallet.save_db()
     return {'seed': seed, 'wallet': wallet, 'msg': msg}
 

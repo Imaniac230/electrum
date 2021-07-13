@@ -256,7 +256,7 @@ class Commands:
         return {
             'seed': d['seed'],
             'path': d['wallet'].storage.path,
-            'msg': d['msg'] if not opt_biometric else None,
+            'msg': d['msg'],
         }
 
     @command('')

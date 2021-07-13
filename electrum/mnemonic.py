@@ -218,6 +218,7 @@ class Mnemonic(Logger):
                 finger = "".join(map(hex, finger)).replace("0x", "")
                 entropy = hashlib.pbkdf2_hmac(HASH_TYPE, finger.encode('utf-8'), b'r503', iterations=PBKDF2_ROUNDS).hex()
                 entropy = int(entropy, base=16)
+                self.logger.info(f"make_seed. prefix: '{prefix}', entropy: {math.ceil(math.log(entropy, 2))} bits")
             except Exception:
                 raise InvalidBiometricData()
         else:
