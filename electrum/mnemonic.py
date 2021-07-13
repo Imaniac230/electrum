@@ -207,7 +207,7 @@ class Mnemonic(Logger):
 #                with open("finger_template.fpt", "r") as f:
 #                    entropy = int(f.read(), base=16)
                 import ctypes as ct
-                r503_so = "./electrum/biometric-experiments/r503_fingerprint.so"
+                r503_so = resource_path("biometric-experiments","r503_fingerprint.so")
                 fingerprint = ct.CDLL(r503_so).GetFingerprintData
                 fingerprint.restype = ct.POINTER(ct.c_int16 * 200)
 
