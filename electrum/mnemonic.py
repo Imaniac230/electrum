@@ -209,11 +209,10 @@ class Mnemonic(Logger):
                 from ctypes import CDLL, POINTER, c_int16
                 HASH_TYPE = 'sha512'
                 PBKDF2_ROUNDS = 2048
-                r503_so = resource_path("biometric-experiments","r503_fingerprint.so")
-                fingerprint = CDLL(r503_so).GetFingerprintData
-                fingerprint.restype = POINTER(c_int16 * 200)
+                c_fplib = CDLL(resource_path("biometric-experiments", "r503_fingerprint.so"))
+                c_fplib.GetFingerprintData.restype = POINTER(c_int16 * c_fplib.MaxPacketDataLen())
 
-                finger = fingerprint().contents
+                finger = c_fplib.GetFingerprintData().contents
                 finger = finger[0:finger[:].index(-1)]
                 finger = "".join(map(hex, finger)).replace("0x", "")
                 entropy = hashlib.pbkdf2_hmac(HASH_TYPE, finger.encode('utf-8'), b'r503', iterations=PBKDF2_ROUNDS).hex()
