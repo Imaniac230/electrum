@@ -56,6 +56,21 @@ MSG_PASSPHRASE_WARN_ISSUE4566 = _("Warning") + ": "\
                               + _("Due to a bug, old versions of Electrum will NOT be creating the "
                                   "same wallet as newer versions or other software.")
 
+BIOMETRIC_SEED_INSTRUCTIONS = (_("This seed will be (re)created from your fingerprint.") + ' '
+                             + _("The sensor will need to read your finger two times.") + "\n\n"
+                             + _("For each scan, place your finger on the sensor while the light") + ' '
+                             + _("is flashing PURPLE and release when it turns BLUE.") + ' '
+                             + _("Alternatively, you can keep your finger pressed for both scans continuously."))
+
+BIOMETRIC_SEED_NOTE = (_("Note:\tCreated seeds cannot be currently recreated by this process!") + '\n'
+                     + _("\tEach new seed will be different even when based on the same finger!"))
+
+BIOMETRIC_SEED_NOTE = ''.join(["<b>" + _("NOTE") + ":</b>",
+                      "<ul>",
+                      "<li>" + _("Created seeds cannot be currently recreated by this process!") + "</li>",
+                      "<li>" + _("Each new seed will be different even when based on the same finger!") + "</li>",
+                      "</ul>"])
+
 
 class CosignWidget(QWidget):
     size = 120
@@ -498,6 +513,23 @@ class InstallWizard(QDialog, MessageBoxMixin, BaseWizard):
         title = _('Enter Seed')
         message = _('Please enter your seed phrase in order to restore your wallet.')
         return self.seed_input(title, message, test, options)
+
+    @wizard_dialog
+    def biometric_seed_dialog(self, run_next, seed_type):
+        main_title = _('Biometric Seed')
+        seed_title = _('Use your biometric data to create or restore a wallet.')
+        vbox = QVBoxLayout()
+        slayout = SeedLayout(
+            seed=BIOMETRIC_SEED_INSTRUCTIONS,
+            title=seed_title,
+            config=self.config,
+        )
+        slayout.seed_e.setMaximumHeight(140)
+        vbox.addLayout(slayout.layout())
+        label = WWLabel(BIOMETRIC_SEED_NOTE)
+        vbox.addWidget(label)
+        self.exec_layout(vbox, main_title)
+        return seed_type
 
     @wizard_dialog
     def confirm_seed_dialog(self, run_next, seed, test):

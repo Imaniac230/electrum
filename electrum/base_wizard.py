@@ -712,14 +712,18 @@ class BaseWizard(Logger):
         self.show_seed_dialog(run_next=f, seed_text=seed)
 
     def use_biometric_seed(self):
-        self.seed_type = 'standard' if self.config.get('nosegwit') else 'segwit'
+        seed_type = 'standard' if self.config.get('nosegwit') else 'segwit'
+        self.biometric_seed_dialog(run_next=self.on_biometric_seed, seed_type=seed_type)
+
+    def on_biometric_seed(self, seed_type):
         from . import mnemonic
+        self.seed_type = seed_type
         seed = mnemonic.Mnemonic('en').make_seed(seed_type=self.seed_type, opt_biometric=True)
         self.opt_bip39 = False
         self.opt_ext = True
         self.opt_slip39 = False
-        f = lambda x: self.run('create_keystore', seed, x)
-        f('')
+        self.create_keystore(seed, '')
+        #self.run('create_keystore', seed, '')
 
     def request_passphrase(self, seed, opt_passphrase):
         if opt_passphrase:
