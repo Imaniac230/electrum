@@ -38,6 +38,35 @@ is a TL;DR::
     python3 -m pip install --user .[gui,crypto]
 
 
+Biometric extension
+-------------------
+
+This will work only on a Raspberry Pi with `PiGpio`_ installed and an `R503`_ fingerprint sensor. Electrum needs to be run with root priviledges. Compile the required C library with::
+
+    ./electrum/biometric-experiments/makesharedlib.sh
+.. _PiGpio: http://abyz.me.uk/rpi/pigpio/
+.. _R503: http://download.mikroe.com/documents/datasheets/R503_datasheet.pdf
+See :code:`electrum/biometric-experiments/README.md`.
+
+*Premise:*
+  * Tedious remembering and storing of various passwords. Mass adoption of crypto can't rely on "one-chance-only" potental life savings storage? You lose your wallet and seed words -> you're homeless, no one can recover your funds. Split funds into muliple wallets? -> Even harder to remember all the phrases. And a person won't always have time nor interest for research into smart techniques for wallet management. Will therefore resort to "trusted authorities" to manage their wallets anyway. What's the point then? -> "Not your keys, not your money" problem.
+  * A bank will confirm my identity when I show up and prove it, and can recover my account. But no banks on the blockchain.
+  * Try to generate wallets reliably tied to own biometric data? Fingers, retinas, face, voice, DNA???, etc. Then I can always recover my wallet just by "existing". No need to remember anything. Will still need a password for encryption.
+
+*Problems:*
+  * Is this a completely stupid idea?
+  * If not, can this even preserve security of trusted algorithms?
+  * If yes, then how to implement this robustly???
+  * Is this feasable? No sensor will provide exactly the same deterministic data each time. But the generated seed must be identical.
+  * Identity theft? Many companies (and banks) may already have samples of our biometric data. -> Futile?
+  * What if I lose my finger(s), my voice changes, etc.?
+  * A single fingerprint is used as entropy for the seed in this "demo". -> Defnitely NOT robust and ideal.
+
+*How to implement?*
+  * Better ways to interpret even the currently used fingerprint data?
+  * Don't even use a wordlist? -> Use bio data (in binary form?) directly instead of words as seed?
+  * Use the biometric data in some completely different way than as direct seeds? But don't give me phrases to remember!
+
 Not pure-python dependencies
 ----------------------------
 
