@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Parameterize
-PYTHON_VERSION=3.7.10
+PYTHON_VERSION=3.7.9
 BUILDDIR=/tmp/electrum-build
 PACKAGE=Electrum
 GIT_REPO=https://github.com/spesmilo/electrum
@@ -16,6 +18,9 @@ export PYTHONDONTWRITEBYTECODE=1  # don't create __pycache__/ folders with .pyc 
 CONTRIB_OSX="$(dirname "$(realpath "$0")")"
 CONTRIB="$CONTRIB_OSX/.."
 PROJECT_ROOT="$CONTRIB/.."
+CACHEDIR="$CONTRIB_OSX/.cache"
+
+mkdir -p "$CACHEDIR"
 
 cd "$PROJECT_ROOT"
 
@@ -60,17 +65,21 @@ function DoCodeSignMaybe { # ARGS: infoName fileOrDirName
     codesign -f -v $deep -s "$CODESIGN_CERT" $hardened_arg "$file" || fail "Could not code sign ${infoName}"
 }
 
-
 info "Installing Python $PYTHON_VERSION"
-export PATH="~/.pyenv/bin:~/.pyenv/shims:~/Library/Python/3.7/bin:$PATH"
-if [ -d "${HOME}/.pyenv" ]; then
-  pyenv update
-else
-  curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash > /dev/null 2>&1
+PKG_FILE="python-${PYTHON_VERSION}-macosx10.9.pkg"
+if [ ! -f "$CACHEDIR/$PKG_FILE" ]; then
+    curl -o "$CACHEDIR/$PKG_FILE" "https://www.python.org/ftp/python/${PYTHON_VERSION}/$PKG_FILE"
 fi
-PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install -s $PYTHON_VERSION && \
-pyenv global $PYTHON_VERSION || \
-fail "Unable to use Python $PYTHON_VERSION"
+echo "bf54a14eef23467991e8c7a88c7307762e484c024a94ec1ee292ac1db3d41fc9  $CACHEDIR/$PKG_FILE" | shasum -a 256 -c \
+     || fail "python pkg checksum mismatched"
+sudo installer -pkg "$CACHEDIR/$PKG_FILE" -target / \
+    || fail "failed to install python"
+
+# sanity check "python3" has the version we just installed.
+FOUND_PY_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
+if [[ "$FOUND_PY_VERSION" != "$PYTHON_VERSION" ]]; then
+    fail "python version mismatch: $FOUND_PY_VERSION != $PYTHON_VERSION"
+fi
 
 break_legacy_easy_install
 
@@ -147,11 +156,7 @@ info "Building $PACKAGE..."
 python3 -m pip install --no-dependencies --no-warn-script-location . > /dev/null || fail "Could not build $PACKAGE"
 
 info "Faking timestamps..."
-for d in ~/Library/Python/ ~/.pyenv .; do
-  pushd "$d"
-  find . -exec touch -t '200101220000' {} +
-  popd
-done
+find . -exec touch -t '200101220000' {} + || true
 
 VERSION=`git describe --tags --dirty --always`
 
