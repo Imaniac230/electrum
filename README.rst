@@ -41,12 +41,12 @@ is a TL;DR::
 Biometric extension
 -------------------
 
-This will work only on a Raspberry Pi with `PiGpio`_ installed and an `R503`_ fingerprint sensor. Electrum needs to be run with root priviledges. Compile the required C library with::
+This works together with an `R503`_ fingerprint sensor. For communication with the sensor a linux device with a usable serial port is required. The preffered method of interaction is using a Raspberry Pi with `PiGpio`_ installed. Compile the necessary C library with::
 
     ./electrum/biometric-experiments/makesharedlib.sh
-.. _PiGpio: http://abyz.me.uk/rpi/pigpio/
 .. _R503: http://download.mikroe.com/documents/datasheets/R503_datasheet.pdf
-See :code:`electrum/biometric-experiments/README.md`.
+.. _PiGpio: http://abyz.me.uk/rpi/pigpio/
+For more info see :code:`electrum/biometric-experiments/README.md`.
 
 *Premise:*
   * Tedious remembering and storing of various passwords. Mass adoption of crypto can't rely on "one-chance-only" potental life savings storage? You lose your wallet and seed words -> you're homeless, no one can recover your funds. Split funds into muliple wallets? -> Even harder to remember all the phrases. And a person won't always have time nor interest for research into smart techniques for wallet management. Will therefore resort to "trusted authorities" to manage their wallets anyway. What's the point then? -> "Not your keys, not your money" problem.

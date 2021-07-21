@@ -190,7 +190,7 @@ class Mnemonic(Logger):
             i = i*n + k
         return i
 
-    def make_seed(self, *, seed_type=None, num_bits=None, opt_biometric=False) -> str:
+    def make_seed(self, *, seed_type=None, num_bits=None, biometric=False) -> str:
         from .keystore import bip39_is_checksum_valid
         if seed_type is None:
             seed_type = 'segwit'
@@ -202,14 +202,14 @@ class Mnemonic(Logger):
         # a better way to interpret the fingerprint data?
         # don't even use a wordlist? -> bio data instead of words as seed?
         # don't rely on fingerprints only -> use a more robust combination of finger (multiple fingers?), voice, face, etc.
-        if opt_biometric:
+        if biometric:
             try:
 #                with open("finger_template.fpt", "r") as f:
 #                    entropy = int(f.read(), base=16)
                 from ctypes import CDLL, POINTER, c_int16
                 HASH_TYPE = 'sha512'
                 PBKDF2_ROUNDS = 2048
-                c_fplib = CDLL(resource_path("biometric-experiments", "r503_fingerprint.so"))
+                c_fplib = CDLL(resource_path("biometric-experiments", "R503_fingerprint.so"))
                 c_fplib.GetFingerprintData.restype = POINTER(c_int16 * c_fplib.MaxPacketDataLen())
 
                 finger = c_fplib.GetFingerprintData().contents
