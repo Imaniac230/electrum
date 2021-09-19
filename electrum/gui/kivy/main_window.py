@@ -18,7 +18,7 @@ from electrum.plugin import run_hook
 from electrum import util
 from electrum.util import (profiler, InvalidPassword, send_exception_to_crash_reporter,
                            format_satoshis, format_satoshis_plain, format_fee_satoshis,
-                           maybe_extract_bolt11_invoice)
+                           maybe_extract_bolt11_invoice, parse_max_spend)
 from electrum.invoices import PR_PAID, PR_FAILED
 from electrum import blockchain
 from electrum.network import Network, TxBroadcastError, BestEffortRequestFailed
@@ -28,6 +28,7 @@ from electrum.bitcoin import COIN
 
 from electrum.gui import messages
 from .i18n import _
+from .util import get_default_language
 from . import KIVY_GUI_PATH
 
 from kivy.app import App
@@ -402,7 +403,7 @@ class ElectrumWindow(App, Logger):
         Logger.__init__(self)
 
         self.electrum_config = config = kwargs.get('config', None)  # type: SimpleConfig
-        self.language = config.get('language', 'en')
+        self.language = config.get('language', get_default_language())
         self.network = network = kwargs.get('network', None)  # type: Network
         if self.network:
             self.num_blocks = self.network.get_local_height()
@@ -988,8 +989,8 @@ class ElectrumWindow(App, Logger):
     def format_amount_and_units(self, x) -> str:
         if x is None:
             return 'none'
-        if x == '!':
-            return 'max'
+        if parse_max_spend(x):
+            return f'max({x})'
         # FIXME this is using format_satoshis_plain instead of config.format_amount
         #       as we sometimes convert the returned string back to numbers,
         #       via self.get_amount()... the need for converting back should be removed
