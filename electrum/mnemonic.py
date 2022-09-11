@@ -215,8 +215,8 @@ class Mnemonic(Logger):
                 finger = c_fplib.GetFingerprintData().contents
                 finger = finger[0:finger[:].index(-1)]
                 finger = "".join(map(hex, finger)).replace("0x", "")
-                entropy = hashlib.pbkdf2_hmac(HASH_TYPE, finger.encode('utf-8'), b'r503', iterations=PBKDF2_ROUNDS).hex()
-                entropy = int(entropy, base=16)
+                entropy = hashlib.pbkdf2_hmac(HASH_TYPE, finger.encode('utf-8'), b'r503', iterations=PBKDF2_ROUNDS)
+                entropy = max(int.from_bytes(entropy, byteorder='little', signed=False), int.from_bytes(entropy, byteorder='big', signed=False))
                 self.logger.info(f"make_seed. prefix: '{prefix}', entropy: {math.ceil(math.log(entropy, 2))} bits")
             except Exception:
                 raise InvalidBiometricData()
